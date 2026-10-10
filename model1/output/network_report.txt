@@ -1,0 +1,101 @@
+NETWORK-MODEL1 — NetworkX analysis
+============================================================
+Source file           : Network-Model1.numbers
+Sites                 : 8  (ATL, AWS, CHI, DEN, DFW, LAX, NYC, SJC)
+Links                 : 14  (site adjacencies: 13)
+Parallel links        : CHI–NYC ['L01', 'L08']
+Installed capacity    : 1400 Gbps
+Connected             : True
+Edge connectivity     : 2  (min links to cut the network)
+Node connectivity     : 2  (min sites to cut the network)
+Articulation points   : none
+Bridges (SPOF links)  : none
+Latency diameter      : 37.0 ms  NYC → ATL → AWS → LAX → SJC
+Avg shortest latency  : 19.01 ms
+
+Per-site metrics
+------------------------------------------------------------
+Site  Role   Links   Gbps  Betweenness  Closeness
+ATL   pop        4    400        0.333     0.0655
+AWS   cloud      2    200        0.238     0.0612
+LAX   pop        4    400        0.238     0.0588
+CHI   pop        5    500        0.048     0.0520
+DEN   pop        4    400        0.048     0.0532
+DFW   pop        4    400        0.048     0.0569
+NYC   pop        3    300        0.000     0.0375
+SJC   pop        2    200        0.000     0.0473
+
+All-pairs lowest-latency matrix (ms)
+------------------------------------------------------------
+          ATL    AWS    CHI    DEN    DFW    LAX    NYC    SJC
+ATL         —    8.0   11.2   22.2   12.4   16.0   15.6   21.4
+AWS       8.0      —   19.2   21.8   20.4    8.0   23.6   13.4
+CHI      11.2   19.2      —   14.5   12.9   27.2   18.2   31.4
+DEN      22.2   21.8   14.5      —    9.8   13.8   32.7   16.9
+DFW      12.4   20.4   12.9    9.8      —   17.1   28.0   22.5
+LAX      16.0    8.0   27.2   13.8   17.1      —   31.6    5.4
+NYC      15.6   23.6   18.2   32.7   28.0   31.6      —   37.0
+SJC      21.4   13.4   31.4   16.9   22.5    5.4   37.0      —
+
+Lowest-latency paths
+------------------------------------------------------------
+ATL→AWS     8.0 ms  ATL → AWS
+ATL→CHI    11.2 ms  ATL → CHI
+ATL→DEN    22.2 ms  ATL → DFW → DEN
+ATL→DFW    12.4 ms  ATL → DFW
+ATL→LAX    16.0 ms  ATL → AWS → LAX
+ATL→NYC    15.6 ms  ATL → NYC
+ATL→SJC    21.4 ms  ATL → AWS → LAX → SJC
+AWS→CHI    19.2 ms  AWS → ATL → CHI
+AWS→DEN    21.8 ms  AWS → LAX → DEN
+AWS→DFW    20.4 ms  AWS → ATL → DFW
+AWS→LAX     8.0 ms  AWS → LAX
+AWS→NYC    23.6 ms  AWS → ATL → NYC
+AWS→SJC    13.4 ms  AWS → LAX → SJC
+CHI→DEN    14.5 ms  CHI → DEN
+CHI→DFW    12.9 ms  CHI → DFW
+CHI→LAX    27.2 ms  CHI → ATL → AWS → LAX
+CHI→NYC    18.2 ms  CHI → NYC
+CHI→SJC    31.4 ms  CHI → DEN → SJC
+DEN→DFW     9.8 ms  DEN → DFW
+DEN→LAX    13.8 ms  DEN → LAX
+DEN→NYC    32.7 ms  DEN → CHI → NYC
+DEN→SJC    16.9 ms  DEN → SJC
+DFW→LAX    17.1 ms  DFW → LAX
+DFW→NYC    28.0 ms  DFW → ATL → NYC
+DFW→SJC    22.5 ms  DFW → LAX → SJC
+LAX→NYC    31.6 ms  LAX → AWS → ATL → NYC
+LAX→SJC     5.4 ms  LAX → SJC
+NYC→SJC    37.0 ms  NYC → ATL → AWS → LAX → SJC
+
+Single-link failure analysis
+------------------------------------------------------------
+L01 CHI–NYC: worst +2.8 ms (CHI↔NYC); diameter 37.0 → 37.0 ms
+L02 DEN–CHI: worst +8.2 ms (CHI↔DEN); diameter 37.0 → 37.8 ms
+L03 DEN–LAX: worst +8.5 ms (DEN↔LAX); diameter 37.0 → 37.0 ms
+L04 NYC–ATL: worst +13.8 ms (ATL↔NYC); diameter 37.0 → 49.6 ms
+L05 DFW–ATL: worst +11.7 ms (ATL↔DFW); diameter 37.0 → 37.0 ms
+L06 DFW–LAX: worst +6.5 ms (DFW↔LAX); diameter 37.0 → 37.0 ms
+L07 CHI–DFW: worst +10.7 ms (CHI↔DFW); diameter 37.0 → 37.0 ms
+L08 CHI–NYC: no latency impact
+L09 DEN–DFW: worst +17.6 ms (DEN↔DFW); diameter 37.0 → 37.0 ms
+L10 CHI–ATL: worst +14.1 ms (ATL↔CHI); diameter 37.0 → 37.0 ms
+L11 SJC–LAX: worst +25.3 ms (AWS↔SJC); diameter 37.0 → 49.6 ms
+L12 DEN–SJC: worst +2.3 ms (DEN↔SJC); diameter 37.0 → 37.0 ms
+L13 LAX–AWS: worst +29.5 ms (AWS↔LAX); diameter 37.0 → 49.6 ms
+L14 ATL–AWS: worst +29.5 ms (ATL↔AWS); diameter 37.0 → 53.1 ms
+
+Single-site failure analysis
+------------------------------------------------------------
+ATL: remaining network stays connected
+AWS: remaining network stays connected
+CHI: remaining network stays connected
+DEN: remaining network stays connected
+DFW: remaining network stays connected
+LAX: remaining network stays connected
+NYC: remaining network stays connected
+SJC: remaining network stays connected
+
+Pairs with only 2 edge-disjoint paths (two link failures can isolate them)
+------------------------------------------------------------
+ATL–AWS, ATL–NYC, ATL–SJC, AWS–CHI, AWS–DEN, AWS–DFW, AWS–LAX, AWS–NYC, AWS–SJC, CHI–NYC, CHI–SJC, DEN–NYC, DEN–SJC, DFW–NYC, DFW–SJC, LAX–NYC, LAX–SJC, NYC–SJC
