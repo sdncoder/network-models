@@ -60,7 +60,7 @@ CLOUD_NODES = {"AWS East", "AWS West"}
 
 # Where each site's name sits relative to its marker (compass direction).
 LABEL_SIDE = {
-    "NYC": "E", "ASH": "E", "ATL": "SE", "CHI": "N", "DFW": "S",
+    "NYC": "E", "ASH": "N", "ATL": "SE", "CHI": "N", "DFW": "S",
     "DEN": "N", "LAX": "SW", "SJC": "W", "AWS East": "W", "AWS West": "W",
 }
 _COMPASS = {
@@ -207,6 +207,67 @@ def _bezier(p0, p2, rad, n=40):
     return (1 - t) ** 2 * p0 + 2 * (1 - t) * t * ctrl + t**2 * p2
 
 
+def site_label_text(G, n):
+    return f"{n}\n{G.nodes[n]['label']}" if len(n) > 3 else G.nodes[n]["label"]
+
+
+def site_label_anchor(G, pos, n):
+    """Where a site's name label is drawn: (x, y, ha)."""
+    ux, uy, ha = _COMPASS[LABEL_SIDE.get(n, "N")]
+    r = 1.25 if G.nodes[n]["kind"] == "cloud" else 1.05
+    x, y = pos[n]
+    return x + r * ux, y + r * uy, ha
+
+
+def site_label_points(G, pos):
+    """Sample points across each site label's footprint (data units), used as
+    obstacles so links and link labels stay off site names."""
+    pts = []
+    for n in G:
+        x, y, ha = site_label_anchor(G, pos, n)
+        width = 0.17 * max(len(line) for line in site_label_text(G, n).split("\n"))
+        x0 = x if ha == "left" else x - width if ha == "right" else x - width / 2
+        pts += [(x0 + f * width, y) for f in (0.0, 0.25, 0.5, 0.75, 1.0)]
+    return np.array(pts)
+
+
+def place_short_label(pos, edge, rad, curve_pts, site_obstacles, text):
+    """
+    Short links: try label spots along the curve (and beside it) and keep the
+    one whose text box has the most clearance from sites, site names and
+    every other link. Clearance is measured against the label's box, not
+    just its centre.
+    """
+    u, v, _ = edge
+    half_w, half_h = 0.085 * len(text) / 2 + 0.1, 0.24
+    p0, p2 = np.asarray(pos[u]), np.asarray(pos[v])
+    d = p2 - p0
+    normal = np.array([d[1], -d[0]]) / np.linalg.norm(d)
+    curve = _bezier(p0, p2, rad, n=21)
+    others = np.vstack([c for e, c in curve_pts.items() if e != edge])
+    own = curve_pts[edge]
+
+    def clearance(c, obstacles, pad=0.0):
+        dx = np.abs(obstacles[:, 0] - c[0]) - half_w
+        dy = np.abs(obstacles[:, 1] - c[1]) - half_h
+        return float(np.min(np.maximum(dx, dy))) - pad
+
+    best, best_score = None, -math.inf
+    for t_idx in (7, 10, 13):                       # t = 0.35, 0.5, 0.65
+        base = curve[t_idx]
+        for off in (0.0, 0.45, -0.45, 0.7, -0.7, 0.95, -0.95):
+            c = base + off * normal
+            score = min(
+                clearance(c, others),
+                clearance(c, site_obstacles, pad=0.55),   # site markers have size
+                clearance(c, own) if off else 1.0,        # beside-line labels must clear their own line
+            )
+            score = min(score, 0.45) - 0.04 * abs(off) - 0.08 * abs(t_idx - 10) / 3
+            if score > best_score:
+                best, best_score = c, score
+    return float(best[0]), float(best[1])
+
+
 def choose_curvature(G, pos, candidates=np.linspace(-0.4, 0.4, 17)):
     """
     For every link pick the arc3 'rad' that keeps the curve clear of other
@@ -221,6 +282,8 @@ def choose_curvature(G, pos, candidates=np.linspace(-0.4, 0.4, 17)):
     node_clear = 0.06 * span
     link_clear = 0.025 * span
 
+    labels = site_label_points(G, pos)
+    text_clear = 0.025 * span
     drawn: list[np.ndarray] = []
     apexes: list[np.ndarray] = []
     label_clear = 0.07 * span
@@ -251,6 +314,11 @@ def choose_curvature(G, pos, candidates=np.linspace(-0.4, 0.4, 17)):
                 link_pen += max(0.0, label_clear - np.linalg.norm(apex - a)) ** 2 * 300
             dapex = np.min(np.linalg.norm(others - apex, axis=1))
             node_pen += max(0.0, node_clear * 1.2 - dapex) ** 2 * 300
+            # stay off site-name labels (the line and this link's own label)
+            dlab = np.min(np.linalg.norm(inner[:, None, :] - labels[None, :, :], axis=2))
+            node_pen += max(0.0, text_clear - dlab) ** 2 * 400
+            dlab_apex = np.min(np.linalg.norm(labels - apex, axis=1))
+            node_pen += max(0.0, node_clear - dlab_apex) ** 2 * 200
             # prefer gentle, geographically faithful curves (but not dead straight)
             shape_pen = (abs(rad) - 0.12) ** 2 * 2.0
             score = node_pen + link_pen + shape_pen
@@ -274,6 +342,8 @@ def draw(G: nx.MultiGraph, outfile: Path, dpi: int = 200,
     """
     pos = {n: project(d["lat"], d["lon"]) for n, d in G.nodes(data=True)}
     rads = choose_curvature(G, pos)
+    site_obstacles = np.vstack([np.array(list(pos.values())), site_label_points(G, pos)])
+    curve_pts = {e: _bezier(pos[e[0]], pos[e[1]], r)[4:-4] for e, r in rads.items()}
 
     fig, ax = plt.subplots(figsize=(15, 8.5))
     fig.patch.set_facecolor("white")
@@ -316,9 +386,8 @@ def draw(G: nx.MultiGraph, outfile: Path, dpi: int = 200,
         dx, dy = np.subtract(pos[v], pos[u])
         length = math.hypot(dx, dy)
         if length < 5.0:
-            nx_, ny_ = dy / length, -dx / length          # unit normal
-            side = 1 if rad >= 0 else -1
-            mx, my = mx + side * 0.75 * nx_, my + side * 0.75 * ny_
+            mx, my = place_short_label(pos, (u, v, k), rad, curve_pts, site_obstacles,
+                                       f"{d['link_id']}  {d['latency_ms']:g} ms")
         ax.text(
             mx, my, f"{d['link_id']}  {d['latency_ms']:g} ms",
             fontsize=7.2, color="black", ha="center", va="center", zorder=3,
@@ -339,10 +408,9 @@ def draw(G: nx.MultiGraph, outfile: Path, dpi: int = 200,
         if len(n) <= 3:
             ax.text(x, y, n, fontsize=7.5, fontweight="bold",
                     ha="center", va="center", color="black", zorder=5)
-        ux, uy, ha = _COMPASS[LABEL_SIDE.get(n, "N")]
-        r = 1.25 if G.nodes[n]["kind"] == "cloud" else 1.05
-        text = f"{n}\n{G.nodes[n]['label']}" if len(n) > 3 else G.nodes[n]["label"]
-        ax.text(x + r * ux, y + r * uy, text, fontsize=8.5, ha=ha, va="center",
+        lx, ly, ha = site_label_anchor(G, pos, n)
+        text = site_label_text(G, n)
+        ax.text(lx, ly, text, fontsize=8.5, ha=ha, va="center",
                 color="black", zorder=5,
                 bbox=dict(boxstyle="round,pad=0.15", fc="white", ec="none", alpha=0.85))
 

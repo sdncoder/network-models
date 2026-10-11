@@ -7,7 +7,7 @@ Network topology models and analysis built in Python with [NetworkX](https://net
 | Model | Focus | Highlights |
 |---|---|---|
 | [model1](model1/) | Backbone topology & resilience | 8 sites, 14 links. Latency-weighted shortest paths, centrality, SPOF detection, single-link and single-site failure analysis, topology map |
-| [model2](model2/) | Dual AWS regions, failure analysis & TE paths | 10 sites, 17 links. Adds Ashburn and separate AWS East/West on-ramps. Full single and double link/site failure sweep, curved geographic map, lowest-latency node-disjoint A/B paths (red/blue) between any two sites |
+| [model2](model2/) | Dual AWS regions, failure analysis & TE paths | 10 sites, 18 links. Adds Ashburn (with NYC–ASH) and separate AWS East/West on-ramps. Full single and double link/site failure sweep, curved geographic map, lowest-latency node-disjoint A/B paths (red/blue) between any two sites |
 
 ## Roadmap
 

@@ -8,13 +8,17 @@ IGP shortest path: 32.2 ms  DEN > DFW > ATL > AWS East  (= A)
 Shared transit sites: none     shared links: none
 Bottleneck capacity: A 100G, B 100G
 
-Candidates: 48 simple paths, 4 node-disjoint pairs. Next best pairs:
+Candidates: 77 simple paths, 8 node-disjoint pairs. Next best pairs:
+   74.7 ms  A 32.2 DEN > DFW > ATL > AWS East
+            B 42.5 DEN > CHI > NYC > ASH > AWS East
    94.8 ms  A 41.5 DEN > CHI > ASH > AWS East
+            B 53.3 DEN > LAX > DFW > ATL > AWS East
+   95.8 ms  A 42.5 DEN > CHI > NYC > ASH > AWS East
             B 53.3 DEN > LAX > DFW > ATL > AWS East
   103.3 ms  A 41.5 DEN > CHI > ASH > AWS East
             B 61.8 DEN > SJC > LAX > DFW > ATL > AWS East
-  129.9 ms  A 41.5 DEN > CHI > ASH > AWS East
-            B 88.4 DEN > SJC > AWS West > LAX > DFW > ATL > AWS East
+  104.3 ms  A 42.5 DEN > CHI > NYC > ASH > AWS East
+            B 61.8 DEN > SJC > LAX > DFW > ATL > AWS East
 
 Single-failure survivability
   failures that take down BOTH paths: 0

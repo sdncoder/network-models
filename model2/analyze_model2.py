@@ -43,6 +43,15 @@ def stranded(comps):
     return sorted(n for c in comps if c is not main for n in c)
 
 
+def describe_split(comps):
+    """Readable outcome; an even split names both halves instead of picking one."""
+    sizes = sorted((len(c) for c in comps), reverse=True)
+    if len(sizes) > 1 and sizes[0] == sizes[1]:
+        halves = sorted((sorted(c) for c in comps), key=lambda c: c[0])
+        return "splits network " + " | ".join(", ".join(h) for h in halves)
+    return f"strands {stranded(comps)}"
+
+
 def main():
     src = Path(sys.argv[1]) if len(sys.argv) > 1 else DEFAULT_SOURCE
     G = build_graph(load_links(src))
@@ -151,7 +160,7 @@ def main():
     for n in nodes:
         comps, K = components_after(H, sites=[n])
         if len(comps) > 1:
-            p(f"  {n:<9} strands {stranded(comps)}")
+            p(f"  {n:<9} {describe_split(comps)}")
         else:
             L2 = lat_matrix(K)
             rest = [x for x in nodes if x != n]
@@ -163,7 +172,7 @@ def main():
         comps, _ = components_after(H, sites=[a, b])
         if len(comps) > 1:
             hit = True
-            p(f"  {a} + {b:<9} strands {stranded(comps)}")
+            p(f"  {a} + {b:<9} {describe_split(comps)}")
     if not hit:
         p("  none")
 
