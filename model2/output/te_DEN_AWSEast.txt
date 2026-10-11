@@ -1,0 +1,31 @@
+TE A/B PATHS  DEN -> AWS East   (node-disjoint, min total latency)
+========================================================================
+A (RED)   32.2 ms  3 hops  DEN > DFW > ATL > AWS East   [L09 L05 L15]
+B (BLUE)  41.5 ms  3 hops  DEN > CHI > ASH > AWS East   [L02 L08 L14]
+
+A/B latency skew: 9.3 ms     pair total: 73.7 ms
+IGP shortest path: 32.2 ms  DEN > DFW > ATL > AWS East  (= A)
+Shared transit sites: none     shared links: none
+Bottleneck capacity: A 100G, B 100G
+
+Candidates: 48 simple paths, 4 node-disjoint pairs. Next best pairs:
+   94.8 ms  A 41.5 DEN > CHI > ASH > AWS East
+            B 53.3 DEN > LAX > DFW > ATL > AWS East
+  103.3 ms  A 41.5 DEN > CHI > ASH > AWS East
+            B 61.8 DEN > SJC > LAX > DFW > ATL > AWS East
+  129.9 ms  A 41.5 DEN > CHI > ASH > AWS East
+            B 88.4 DEN > SJC > AWS West > LAX > DFW > ATL > AWS East
+
+Single-failure survivability
+  failures that take down BOTH paths: 0
+  link L02 CHI-DEN           A up    B DOWN
+  link L08 CHI-ASH           A up    B DOWN
+  link L09 DEN-DFW           A DOWN  B up
+  link L05 ATL-DFW           A DOWN  B up
+  link L15 ATL-AWS East      A DOWN  B up
+  link L14 ASH-AWS East      A up    B DOWN
+  site CHI                   A up    B DOWN
+  site ATL                   A DOWN  B up
+  site DFW                   A DOWN  B up
+  site ASH                   A up    B DOWN
+  (all other single failures leave both A and B up)

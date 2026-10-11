@@ -1,0 +1,138 @@
+========================================================================
+1. LATENCY — lowest one-way latency between every pair of sites (ms)
+========================================================================
+               ASH      ATL AWS East AWS West      CHI      DEN      DFW      LAX      NYC      SJC
+ASH              -     12.0      6.0     59.5     21.0     34.2     24.4     41.5     27.6     46.9
+ATL           12.0        -     10.0     47.5     11.2     22.2     12.4     29.5     15.6     34.9
+AWS East       6.0     10.0        -     57.5     21.2     32.2     22.4     39.5     25.6     44.9
+AWS West      59.5     47.5     57.5        -     45.4     30.9     35.1     18.0     63.1     14.0
+CHI           21.0     11.2     21.2     45.4        -     14.5     12.9     28.3     18.2     31.4
+DEN           34.2     22.2     32.2     30.9     14.5        -      9.8     13.8     32.7     16.9
+DFW           24.4     12.4     22.4     35.1     12.9      9.8        -     17.1     28.0     22.5
+LAX           41.5     29.5     39.5     18.0     28.3     13.8     17.1        -     45.1      5.4
+NYC           27.6     15.6     25.6     63.1     18.2     32.7     28.0     45.1        -     49.6
+SJC           46.9     34.9     44.9     14.0     31.4     16.9     22.5      5.4     49.6        -
+
+Network diameter (worst best-case latency): 63.1 ms
+Five longest site-to-site paths:
+  AWS West > NYC       63.1 ms  4 hops  AWS West > LAX > DFW > ATL > NYC
+       ASH > AWS West  59.5 ms  4 hops  ASH > ATL > DFW > LAX > AWS West
+  AWS East > AWS West  57.5 ms  4 hops  AWS East > ATL > DFW > LAX > AWS West
+       NYC > SJC       49.6 ms  3 hops  NYC > CHI > DEN > SJC
+       ATL > AWS West  47.5 ms  3 hops  ATL > DFW > LAX > AWS West
+Mean site-to-site latency: 27.8 ms
+
+Links not on their own endpoints' lowest-latency path (detour is faster):
+  none
+
+Best-path load per link (site pairs routed over it, of 45):
+  L05: 18
+  L06: 14
+  L15: 8
+  L13: 7
+  L16: 6
+  L04: 6
+  L02: 6
+  L11: 5
+  L12: 5
+  L09: 4
+  L17: 3
+  L01: 3
+  L10: 2
+  L03: 2
+  L14: 1
+  L08: 1
+  L07: 1
+  carrying no best paths: none
+
+========================================================================
+2. SINGLE-LINK FAILURES
+========================================================================
+Cuts that isolate a site: 0 of 17
+
+Worst latency increase each single cut causes (sorted):
+  L11  + 25.3 ms   worst pair LAX > SJC: 5.4 -> 30.7 ms
+  L09  + 17.6 ms   worst pair DEN > DFW: 9.8 -> 27.4 ms
+  L14  + 16.0 ms   worst pair ASH > AWS East: 6.0 -> 22.0 ms
+  L10  + 14.1 ms   worst pair ATL > CHI: 11.2 -> 25.3 ms
+  L04  + 13.8 ms   worst pair ATL > NYC: 15.6 -> 29.4 ms
+  L05  + 11.7 ms   worst pair AWS East > DFW: 22.4 -> 34.1 ms
+  L07  + 10.7 ms   worst pair CHI > DFW: 12.9 -> 23.6 ms
+  L17  +  9.4 ms   worst pair AWS West > SJC: 14.0 -> 23.4 ms
+  L01  +  8.6 ms   worst pair CHI > NYC: 18.2 -> 26.8 ms
+  L03  +  8.5 ms   worst pair DEN > LAX: 13.8 -> 22.3 ms
+  L02  +  8.2 ms   worst pair CHI > DEN: 14.5 -> 22.7 ms
+  L15  +  8.0 ms   worst pair AWS East > SJC: 44.9 -> 52.9 ms
+  L06  +  6.5 ms   worst pair DFW > LAX: 17.1 -> 23.6 ms
+  L13  +  4.0 ms   worst pair ASH > SJC: 46.9 -> 50.9 ms
+  L12  +  2.3 ms   worst pair DEN > SJC: 16.9 -> 19.2 ms
+  L08  +  2.2 ms   worst pair ASH > CHI: 21.0 -> 23.2 ms
+  L16  +  1.4 ms   worst pair AWS West > LAX: 18.0 -> 19.4 ms
+
+========================================================================
+3. DOUBLE-LINK FAILURES (every pair of links)
+========================================================================
+3 of 136 double-link cuts split the network (2.2%)
+
+  L01+L04   isolates NYC
+  L16+L17   isolates AWS West
+  L15+L14   isolates AWS East
+
+Exposure by site (double cuts that strand it):
+  ASH        0  
+  ATL        0  
+  AWS East   1  L15+L14
+  AWS West   1  L16+L17
+  CHI        0  
+  DEN        0  
+  DFW        0  
+  LAX        0  
+  NYC        1  L01+L04
+  SJC        0  
+
+========================================================================
+4. SITE FAILURES (power / facility loss)
+========================================================================
+Single-site loss:
+  ASH       no isolation; worst stretch +0.0 ms (NYC > SJC)
+  ATL       no isolation; worst stretch +19.6 ms (AWS East > NYC)
+  AWS East  no isolation; worst stretch +0.0 ms (NYC > SJC)
+  AWS West  no isolation; worst stretch +0.0 ms (NYC > SJC)
+  CHI       no isolation; worst stretch +5.1 ms (DEN > NYC)
+  DEN       no isolation; worst stretch +4.0 ms (CHI > SJC)
+  DFW       no isolation; worst stretch +10.0 ms (AWS East > LAX)
+  LAX       no isolation; worst stretch +5.6 ms (AWS West > DFW)
+  NYC       no isolation; worst stretch +0.0 ms (LAX > SJC)
+  SJC       no isolation; worst stretch +0.9 ms (AWS West > DEN)
+
+Double-site loss that strands a surviving site:
+  ASH + ATL       strands ['AWS East']
+  ATL + CHI       strands ['ASH', 'AWS East', 'NYC']
+  CHI + DFW       strands ['AWS West', 'DEN', 'LAX', 'SJC']
+  DEN + DFW       strands ['AWS West', 'LAX', 'SJC']
+  DEN + LAX       strands ['AWS West', 'SJC']
+  LAX + SJC       strands ['AWS West']
+
+========================================================================
+5. CLOUD REACHABILITY UNDER FAILURE
+========================================================================
+AWS East: on-ramps ['ASH', 'ATL']
+   lose L04  -> worst POP NYC +13.8 ms
+   lose L10  -> worst POP CHI +5.8 ms
+   lose L09  -> worst POP DEN +3.5 ms
+   lose L06  -> worst POP LAX +6.5 ms
+   lose L11  -> worst POP SJC +4.2 ms
+   lose L05  -> worst POP DFW +11.7 ms
+   lose L15  -> worst POP SJC +8.0 ms
+   lose L14  -> worst POP ASH +16.0 ms
+   double-link cuts that strand a POP from AWS East: 2
+AWS West: on-ramps ['LAX', 'SJC']
+   lose L04  -> worst POP NYC +0.5 ms
+   lose L02  -> worst POP CHI +2.6 ms
+   lose L12  -> worst POP DEN +0.9 ms
+   lose L06  -> worst POP DFW +5.6 ms
+   lose L16  -> worst POP LAX +1.4 ms
+   lose L05  -> worst POP ATL +9.1 ms
+   lose L13  -> worst POP ASH +4.0 ms
+   lose L17  -> worst POP SJC +9.4 ms
+   double-link cuts that strand a POP from AWS West: 2
